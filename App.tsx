@@ -148,9 +148,10 @@ const App: React.FC = () => {
               secondaryIcon={<ExternalLinkIcon />}
             />
             <LinkButton 
-              onClick={() => setActiveModal('instagram')}
+              href="https://www.instagram.com/skinaodogole/"
               icon={<InstagramIcon />}
               text="Instagram"
+              secondaryIcon={<ExternalLinkIcon />}
             />
             <LinkButton 
               onClick={() => setActiveModal('location')}
@@ -171,17 +172,14 @@ const App: React.FC = () => {
         </div>
       </div>
       
-      <Modal isOpen={activeModal === 'instagram'} onClose={handleCloseModal} title="Instagram">
-        <p className="text-center text-lg text-black/80 p-4">Nossa página está em construção. Volte em breve!</p>
-      </Modal>
-
       <Modal isOpen={activeModal === 'location'} onClose={handleCloseModal} title="Nossa Localização">
         <p className="text-black/90 mb-4">
             Mercearia e conveniência Skinão<br/>
             R. Maria Úrsula de Abreu, 361 - casa 5 - Cará-Cará, Ponta Grossa - PR, 84032-436
         </p>
         <div className="rounded-lg overflow-hidden border-2 border-yellow-300">
-           <iframe src="https://www.google.com/maps/embed?pb=!1m18!m12!1m3!1d3612.786208031158!2d-50.1037134!3d-25.1090974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94e81b23776708ad%3A0xa288f07b013bdc0f!2sMercearia%20e%20conveni%C3%AAncia%20Skin%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1760552708052!5m2!1spt-BR!2sbr" width="100%" height="350" style={{ border:0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+           {/* Fix: Changed allowFullScreen="" to allowFullScreen to pass a boolean value instead of a string. */}
+           <iframe src="https://www.google.com/maps/embed?pb=!1m18!m12!1m3!1d3612.786208031158!2d-50.1037134!3d-25.1090974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94e81b23776708ad%3A0xa288f07b013bdc0f!2sMercearia%20e%20conveni%C3%AAncia%20Skin%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1760552708052!5m2!1spt-BR!2sbr" width="100%" height="350" style={{ border:0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
         </div>
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(locationAddress)}`}
