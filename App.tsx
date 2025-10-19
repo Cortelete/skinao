@@ -84,8 +84,7 @@ const App: React.FC = () => {
   const handleRatingSubmit = () => {
     if (rating === 0) return;
     if (rating === 5) {
-      window.open('https://search.google.com/local/writereview?placeid=ChIJrQhndyMb6JQRD9w7AXvwiKI', '_blank');
-      handleCloseModal();
+      setActiveModal('ratingSuccess5');
     } else {
       setActiveModal('feedback');
     }
@@ -94,13 +93,11 @@ const App: React.FC = () => {
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (feedback.trim() === '') return;
-    const mailtoLink = `mailto:contato@skinaodogole.com.br?subject=Feedback de Cliente (Avaliação: ${rating} estrelas)&body=${encodeURIComponent(feedback)}`;
-    window.location.href = mailtoLink;
-    handleCloseModal();
+    setActiveModal('feedbackSuccess');
   };
 
   const handleSendWhatsApp = () => {
-    const phone = '5542998377955';
+    const phone = '5541988710303'; // Número de exemplo
     let message = '';
 
     if (contactReason === 'comprar') {
@@ -119,7 +116,7 @@ const App: React.FC = () => {
     setContactItems(prev => ({...prev, [item]: !prev[item]}));
   };
 
-  const locationAddress = "Mercearia e conveniência Skinão, R. Maria Úrsula de Abreu, 361 - casa 5 - Cará-Cará, Ponta Grossa - PR, 84032-436";
+  const locationAddress = "Estádio do Maracanã, Rio de Janeiro, Brasil";
 
   return (
     <main className="min-h-screen animated-gradient flex items-center justify-center p-2 sm:p-4 font-sans">
@@ -128,12 +125,12 @@ const App: React.FC = () => {
         
           <img 
             src="/img.png" 
-            alt="Skinão do Gole Conveniência" 
+            alt="Exemplão Conveniência e Distribuidora" 
             className="w-32 sm:w-48 h-auto mb-2 sm:mb-4" 
           />
 
           <h1 className="text-2xl sm:text-3xl font-bold text-black text-center tracking-tight">
-            Skinão do Gole Conveniência
+            Exemplão Conveniência e Distribuidora
           </h1>
 
           <p className="text-sm sm:text-base text-black/80 text-center mt-1 mb-6">
@@ -142,16 +139,14 @@ const App: React.FC = () => {
 
           <div className="w-full flex flex-col space-y-3 sm:space-y-4">
             <LinkButton 
-              href="https://wa.me/5542000000000?text=Ol%C3%A1%2C%20gostaria%20de%20ver%20o%20cat%C3%A1logo!"
+              onClick={() => setActiveModal('catalog')}
               icon={<MenuIcon />}
               text="Catálogo de Produtos"
-              secondaryIcon={<ExternalLinkIcon />}
             />
             <LinkButton 
-              href="https://www.instagram.com/skinaodogole/"
+              onClick={() => setActiveModal('instagram')}
               icon={<InstagramIcon />}
               text="Instagram"
-              secondaryIcon={<ExternalLinkIcon />}
             />
             <LinkButton 
               onClick={() => setActiveModal('location')}
@@ -172,14 +167,39 @@ const App: React.FC = () => {
         </div>
       </div>
       
+      {/* --- MODALS --- */}
+
+      <Modal isOpen={activeModal === 'catalog'} onClose={handleCloseModal} title="Um Catálogo Digital para o seu Negócio">
+        <p className="text-black/90 mb-4 text-center">
+            Imagine seus produtos em um catálogo digital interativo e visualmente deslumbrante, como este site.
+        </p>
+        <div className="space-y-3 my-6 text-black/90">
+            <p className="flex items-center"><span className="text-xl mr-3">✨</span> Design moderno e animado</p>
+            <p className="flex items-center"><span className="text-xl mr-3">📸</span> Fotos e vídeos em alta qualidade</p>
+            <p className="flex items-center"><span className="text-xl mr-3">🔄</span> Manutenção avulsa, semanal, ou individual</p>
+            <p className="flex items-center"><span className="text-xl mr-3">🔗</span> Link direto para compra no WhatsApp</p>
+        </div>
+        <p className="text-black/90 mb-6 text-center">
+            Podemos criar uma experiência única para seus clientes.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={handleCloseModal} className="w-full bg-gray-300 text-black font-bold py-3 px-4 rounded-lg hover:bg-gray-400 transition-colors">
+              Fechar
+            </button>
+            <button onClick={() => setActiveModal('contact')} className="w-full bg-yellow-500 text-black font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors">
+              Quero um para mim!
+            </button>
+        </div>
+      </Modal>
+
       <Modal isOpen={activeModal === 'location'} onClose={handleCloseModal} title="Nossa Localização">
         <p className="text-black/90 mb-4">
-            Mercearia e conveniência Skinão<br/>
-            R. Maria Úrsula de Abreu, 361 - casa 5 - Cará-Cará, Ponta Grossa - PR, 84032-436
+            Exemplão Conveniência e Distribuidora<br/>
+            Rua Exemplo, 123 - Bairro Modelo<br/>
+            Cidade Fictícia - UF, 00000-000
         </p>
         <div className="rounded-lg overflow-hidden border-2 border-yellow-300">
-           {/* Fix: Changed allowFullScreen="" to allowFullScreen to pass a boolean value instead of a string. */}
-           <iframe src="https://www.google.com/maps/embed?pb=!1m18!m12!1m3!1d3612.786208031158!2d-50.1037134!3d-25.1090974!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94e81b23776708ad%3A0xa288f07b013bdc0f!2sMercearia%20e%20conveni%C3%AAncia%20Skin%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1760552708052!5m2!1spt-BR!2sbr" width="100%" height="350" style={{ border:0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3675.215585099517!2d-43.23235308556784!3d-22.90535564498344!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x997e59c3552a49%3A0x23b325fb82348b6!2sEst%C3%A1dio%20do%20Maracan%C3%A3!5e0!3m2!1spt-BR!2sbr!4v1655315801937!5m2!1spt-BR!2sbr" width="100%" height="350" style={{ border:0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
         </div>
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(locationAddress)}`}
@@ -188,7 +208,7 @@ const App: React.FC = () => {
           className="w-full mt-4 flex items-center justify-center bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors"
         >
           <DirectionsIcon />
-          <span className="ml-2">Obter Rotas</span>
+          <span className="ml-2">Obter Rotas (Exemplo)</span>
         </a>
       </Modal>
 
@@ -297,6 +317,33 @@ const App: React.FC = () => {
             </button>
           </div>
         )}
+      </Modal>
+
+      <Modal isOpen={activeModal === 'instagram'} onClose={handleCloseModal} title="Instagram do seu Negócio">
+        <p className="text-center text-black/80">
+          Ao clicar neste botão, seu cliente seria redirecionado diretamente para o perfil do seu negócio no Instagram.
+        </p>
+        <button onClick={handleCloseModal} className="w-full mt-4 bg-yellow-500 text-black font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors">
+          Entendi
+        </button>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'ratingSuccess5'} onClose={handleCloseModal} title="Obrigado por nos avaliar!">
+        <p className="text-center text-black/80">
+          Em um site real, o cliente seria redirecionado para a página de avaliações do seu negócio no Google para deixar uma avaliação de 5 estrelas.
+        </p>
+        <button onClick={handleCloseModal} className="w-full mt-4 bg-yellow-500 text-black font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors">
+          Entendi
+        </button>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'feedbackSuccess'} onClose={handleCloseModal} title="Feedback Recebido!">
+        <p className="text-center text-black/80">
+          Obrigado pelo seu feedback. Em uma aplicação real, esta mensagem seria enviada diretamente para o email do proprietário.
+        </p>
+        <button onClick={handleCloseModal} className="w-full mt-4 bg-yellow-500 text-black font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors">
+          Entendi
+        </button>
       </Modal>
       
       <style>{`
