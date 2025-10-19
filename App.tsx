@@ -20,7 +20,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
       role="dialog"
     >
       <div 
-        className="bg-rose-50 rounded-2xl shadow-xl w-full max-w-lg p-6 relative transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale" 
+        className="bg-rose-50 rounded-2xl shadow-xl w-[95vw] sm:w-full max-w-lg p-6 relative transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale max-h-[85vh] overflow-y-auto" 
         onClick={e => e.stopPropagation()}
       >
         <h2 className="font-serif text-2xl font-bold text-stone-800 mb-4 text-center sm:text-left">{title}</h2>
@@ -35,10 +35,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
       </div>
       <style>{`
         @keyframes fade-in-scale {
-          from { opacity: 0; transform: scale(0.95); }
+          from { opacity: 0; transform: scale(0.4); }
           to { opacity: 1; transform: scale(1); }
         }
-        .animate-fade-in-scale { animation: fade-in-scale 0.3s forwards cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-fade-in-scale { 
+          animation: fade-in-scale 0.5s forwards cubic-bezier(0.2, 1, 0.3, 1);
+          animation-delay: 0.2s; /* Delay to sync with logo expansion */
+        }
       `}</style>
     </div>
   );
@@ -68,26 +71,9 @@ const App: React.FC = () => {
   const [developerContactName, setDeveloperContactName] = useState('');
   const [isLogoSpinning, setLogoSpinning] = useState(false);
 
-  const servicesData = [
-    {
-      name: 'Corte Moderno & Estilização',
-      description: 'Análise de visagismo, corte personalizado, lavagem relaxante e finalização com os melhores produtos.',
-      price: 'A partir de R$ 150'
-    },
-    {
-      name: 'Coloração Premium & Mechas',
-      description: 'Técnicas avançadas de coloração, mechas (luzes, ombré), correção de cor e tratamento pós-química.',
-      price: 'A partir de R$ 350'
-    },
-    {
-      name: 'Tratamento Capilar Profundo',
-      description: 'Reconstrução, hidratação ou nutrição intensiva para devolver a saúde e o brilho aos seus fios.',
-      price: 'A partir de R$ 200'
-    }
-  ];
-
   const handleCloseModal = () => {
     setActiveModal(null);
+    // Reset states after the modal's closing animation (approx 300ms)
     setTimeout(() => {
         setRating(0);
         setHoverRating(0);
@@ -101,16 +87,19 @@ const App: React.FC = () => {
         setSelectedService(null);
         setDeveloperModalStep(1);
         setDeveloperContactName('');
+        // Reset the logo animation state here, so it's ready for the next click
+        setLogoSpinning(false);
     }, 300);
   };
   
   const handleLogoClick = () => {
     if (isLogoSpinning) return;
     setLogoSpinning(true);
+    // Set the active modal after a short delay to let the logo animation kick in.
+    // The modal itself has an animation-delay, so it will appear to expand from the logo.
     setTimeout(() => {
       setActiveModal('about');
-      setLogoSpinning(false);
-    }, 1000); // Animation duration
+    }, 150);
   };
 
   const handleRatingSubmit = () => {
@@ -157,19 +146,20 @@ const App: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen animated-gradient flex items-center justify-center p-2 sm:p-4 font-sans">
+    <main className="min-h-screen animated-gradient flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-md bg-white/30 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 border border-white/20">
         <div className="flex flex-col items-center animate-fade-in opacity-0">
         
           <button 
             onClick={handleLogoClick} 
             className="mb-4 rounded-full focus:outline-none focus:ring-4 focus:ring-pink-300/50 transition-shadow duration-300" 
+            style={{ perspective: '1000px' }}
             aria-label="Saiba mais sobre nós"
           >
             <img 
               src="/logo.png" 
               alt="Exemplo Link Bio Logo" 
-              className={`w-32 sm:w-40 h-auto rounded-full shadow-lg transition-transform duration-1000 ${isLogoSpinning ? 'animate-spin-whoosh' : ''}`} 
+              className={`w-28 sm:w-36 h-auto rounded-full shadow-lg transition-transform duration-1000 ${isLogoSpinning ? 'animate-spin-whoosh' : ''}`} 
             />
           </button>
 
@@ -177,11 +167,11 @@ const App: React.FC = () => {
             Exemplo Link Bio
           </h1>
 
-          <p className="text-sm sm:text-base font-medium text-center mt-2 mb-8 text-gradient-animated">
+          <p className="text-sm sm:text-base font-medium text-center mt-2 mb-6 text-gradient-animated">
             Seu slogan aqui em destaque para seu cliente
           </p>
 
-          <div className="w-full flex flex-col space-y-3 sm:space-y-4">
+          <div className="w-full flex flex-col space-y-3">
             <div className="animate-fade-in-up opacity-0" style={{animationDelay: '100ms'}}><LinkButton onClick={() => setActiveModal('services')} icon={<ServicesIcon />} text="Nossos Serviços" /></div>
             <div className="animate-fade-in-up opacity-0" style={{animationDelay: '200ms'}}><LinkButton onClick={() => setActiveModal('portfolio')} icon={<InstagramIcon />} text="Nosso Portfólio" /></div>
             <div className="animate-fade-in-up opacity-0" style={{animationDelay: '300ms'}}><LinkButton onClick={() => setActiveModal('location')} icon={<LocationIcon />} text="Nossa Localização" /></div>
@@ -223,23 +213,51 @@ const App: React.FC = () => {
         <button onClick={handleCloseModal} className="w-full mt-6 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Entendi</button>
       </Modal>
 
-      <Modal isOpen={activeModal === 'services'} onClose={handleCloseModal} title="Nossos Serviços">
+      <Modal isOpen={activeModal === 'services'} onClose={handleCloseModal} title="Demonstração: Sua Vitrine de Serviços">
         <div className="text-left text-stone-700 space-y-4">
-          {servicesData.map((service, index) => (
-            <div key={index} className="bg-white border-2 border-pink-200 p-4 rounded-lg transition-shadow hover:shadow-md">
-              <h5 className="font-serif text-lg text-pink-500 font-bold">{service.name}</h5>
-              <p className="text-sm text-stone-600 mt-1">{service.description}</p>
-              <div className="flex justify-between items-center mt-3">
-                <p className="text-sm font-semibold text-stone-700">{service.price}</p>
-                <button 
-                  onClick={() => handleScheduleService(service.name)}
-                  className="bg-pink-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-500 transition-colors text-sm"
-                >
-                  Agendar
-                </button>
-              </div>
+          
+          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg transition-shadow hover:shadow-md">
+            <h5 className="font-serif text-lg text-pink-500 font-bold">Exemplo 1: Serviço Detalhado</h5>
+            <p className="text-sm text-stone-600 mt-1">Aqui você pode descrever um serviço em detalhes, destacando os benefícios. A clareza nas informações e o preço visível incentivam a ação imediata da sua cliente.</p>
+            <div className="flex justify-between items-center mt-3">
+              <p className="text-sm font-semibold text-stone-700">Preço Fictício</p>
+              <button 
+                onClick={() => handleScheduleService('Serviço Detalhado')}
+                className="bg-pink-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-500 transition-colors text-sm"
+              >
+                Agendar (Simulação)
+              </button>
             </div>
-          ))}
+          </div>
+
+          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg transition-shadow hover:shadow-md">
+            <h5 className="font-serif text-lg text-pink-500 font-bold">Exemplo 2: Pacote Promocional</h5>
+            <p className="text-sm text-stone-600 mt-1">Crie ofertas irresistíveis! Um pacote de serviços com desconto é uma ótima forma de aumentar o ticket médio e apresentar novos tratamentos.</p>
+            <div className="flex justify-between items-center mt-3">
+              <p className="text-sm font-semibold text-stone-700">Preço Fictício</p>
+              <button 
+                onClick={() => handleScheduleService('Pacote Promocional')}
+                className="bg-pink-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-500 transition-colors text-sm"
+              >
+                Agendar (Simulação)
+              </button>
+            </div>
+          </div>
+          
+          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg transition-shadow hover:shadow-md">
+            <h5 className="font-serif text-lg text-pink-500 font-bold">Exemplo 3: Lançamento</h5>
+            <p className="text-sm text-stone-600 mt-1">Destaque uma novidade ou um procedimento exclusivo. É ideal para gerar curiosidade e atrair tanto clientes novas quanto as que já frequentam seu espaço.</p>
+            <div className="flex justify-between items-center mt-3">
+              <p className="text-sm font-semibold text-stone-700">Preço Fictício</p>
+              <button 
+                onClick={() => handleScheduleService('Lançamento Exclusivo')}
+                className="bg-pink-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-500 transition-colors text-sm"
+              >
+                Agendar (Simulação)
+              </button>
+            </div>
+          </div>
+          
           <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg mt-4">
             <h4 className="font-bold">Da Vitrine ao WhatsApp</h4>
             <p className="mt-2 text-sm">Aqui, sua cliente confere seus serviços e, com um clique, envia uma solicitação de agendamento personalizada direto para o seu WhatsApp. Facilita para ela, organiza para você.</p>
@@ -493,12 +511,20 @@ const App: React.FC = () => {
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes spin-whoosh {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(540deg) scale(1.1); }
-            100% { transform: rotate(1080deg) scale(1); }
+          0% {
+            transform: rotateY(0deg) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: rotateY(720deg) scale(20);
+            opacity: 0;
+          }
         }
         .animate-spin-whoosh {
-            animation: spin-whoosh 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+          animation: spin-whoosh 0.8s cubic-bezier(0.5, 0, 0.75, 1) forwards;
+          transform-style: preserve-3d;
+          position: relative;
+          z-index: 60;
         }
         .animate-fade-in { animation: fade-in 0.5s forwards cubic-bezier(0.4, 0, 0.2, 1); }
         .animate-fade-in-up { animation: fade-in-up 0.6s forwards cubic-bezier(0.4, 0, 0.2, 1); }
