@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import LinkButton from './components/LinkButton';
 import { ServicesIcon, InstagramIcon, LocationIcon, StarIcon, CloseIcon, WhatsAppIcon, ExternalLinkIcon } from './components/Icons';
@@ -14,33 +15,51 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4 transition-opacity duration-300" 
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex justify-center items-end sm:items-center p-0 sm:p-4"
       aria-modal="true"
       role="dialog"
     >
+      {/* Backdrop com blur pesado e escurecimento */}
       <div 
-        className="bg-rose-50 rounded-2xl shadow-xl w-[95vw] sm:w-full max-w-lg p-6 relative transform transition-all duration-300 scale-95 opacity-0 animate-fade-in-scale max-h-[85vh] overflow-y-auto" 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClose}
+      />
+      
+      <div 
+        className="bg-[#0f0f0f] sm:rounded-2xl rounded-t-2xl border border-white/10 shadow-2xl w-full sm:w-full max-w-lg p-6 relative transform transition-all duration-500 translate-y-0 animate-slide-up sm:animate-fade-in-scale max-h-[90vh] overflow-y-auto text-white" 
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="font-serif text-2xl font-bold text-stone-800 mb-4 text-center sm:text-left">{title}</h2>
+        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6 sm:hidden" /> {/* Puxador Mobile */}
+        
+        <h2 className="font-serif text-2xl sm:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6 text-center uppercase tracking-wider">{title}</h2>
+        
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 text-stone-500 hover:text-stone-800 transition-colors"
-          aria-label="Close modal"
+          className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors hidden sm:block"
+          aria-label="Fechar"
         >
           <CloseIcon />
         </button>
-        {children}
+        
+        <div className="space-y-6 font-light leading-relaxed text-gray-300">
+            {children}
+        </div>
       </div>
+
       <style>{`
         @keyframes fade-in-scale {
-          from { opacity: 0; transform: scale(0.4); }
+          from { opacity: 0; transform: scale(0.95); }
           to { opacity: 1; transform: scale(1); }
         }
+        @keyframes slide-up {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
         .animate-fade-in-scale { 
-          animation: fade-in-scale 0.5s forwards cubic-bezier(0.2, 1, 0.3, 1);
-          animation-delay: 0.2s; /* Delay to sync with logo expansion */
+          animation: fade-in-scale 0.3s ease-out forwards;
+        }
+        .animate-slide-up {
+          animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
     </div>
@@ -59,11 +78,12 @@ const App: React.FC = () => {
   const [contactName, setContactName] = useState('');
   const [contactReason, setContactReason] = useState('');
   const [contactDateTime, setContactDateTime] = useState('');
+  // Serviços genéricos
   const [contactServices, setContactServices] = useState<Record<string, boolean>>({
-      'Corte & Estilo': false,
-      'Coloração': false,
-      'Tratamento Facial': false,
-      'Manicure & Pedicure': false,
+      'Consultoria Premium': false,
+      'Atendimento Personalizado': false,
+      'Projetos Exclusivos': false,
+      'Mentoria & Suporte': false,
   });
   const [contactOtherReason, setContactOtherReason] = useState('');
 
@@ -73,7 +93,6 @@ const App: React.FC = () => {
 
   const handleCloseModal = () => {
     setActiveModal(null);
-    // Reset states after the modal's closing animation (approx 300ms)
     setTimeout(() => {
         setRating(0);
         setHoverRating(0);
@@ -82,12 +101,12 @@ const App: React.FC = () => {
         setContactName('');
         setContactReason('');
         setContactDateTime('');
-        setContactServices({ 'Corte & Estilo': false, 'Coloração': false, 'Tratamento Facial': false, 'Manicure & Pedicure': false });
+        // Reset para padrão genérico
+        setContactServices({ 'Consultoria Premium': false, 'Atendimento Personalizado': false, 'Projetos Exclusivos': false, 'Mentoria & Suporte': false });
         setContactOtherReason('');
         setSelectedService(null);
         setDeveloperModalStep(1);
         setDeveloperContactName('');
-        // Reset the logo animation state here, so it's ready for the next click
         setLogoSpinning(false);
     }, 300);
   };
@@ -95,8 +114,6 @@ const App: React.FC = () => {
   const handleLogoClick = () => {
     if (isLogoSpinning) return;
     setLogoSpinning(true);
-    // Set the active modal after a short delay to let the logo animation kick in.
-    // The modal itself has an animation-delay, so it will appear to expand from the logo.
     setTimeout(() => {
       setActiveModal('about');
     }, 150);
@@ -136,8 +153,8 @@ const App: React.FC = () => {
     if (!developerContactName.trim()) return;
     
     const devPhoneNumber = "5541988710303";
-    const clientName = "Exemplo Link Bio";
-    const message = `Olá, vi o link do ${clientName} e quero um site igual! Meu nome é ${developerContactName}.`;
+    const clientName = "Link Bio Premium";
+    const message = `Olá, vi o modelo ${clientName} e desejo elevar o nível do meu negócio! Meu nome é ${developerContactName}.`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${devPhoneNumber}&text=${encodedMessage}`;
     
@@ -146,357 +163,333 @@ const App: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen animated-gradient flex items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-md bg-white/30 backdrop-blur-lg rounded-3xl shadow-2xl p-4 sm:p-8 border border-white/20">
+    <main className="min-h-screen animated-gradient flex items-center justify-center p-4 font-sans text-white overflow-hidden relative">
+      {/* Background Noise Overlay for Texture */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+
+      <div className="w-full max-w-md bg-black/20 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl p-6 sm:p-10 border border-white/10 relative z-10">
         <div className="flex flex-col items-center animate-fade-in opacity-0">
         
           <button 
             onClick={handleLogoClick} 
-            className="mb-4 rounded-full focus:outline-none focus:ring-4 focus:ring-pink-300/50 transition-shadow duration-300" 
+            className="mb-6 rounded-full focus:outline-none hover:scale-105 transition-transform duration-500 ring-2 ring-white/20 ring-offset-4 ring-offset-transparent" 
             style={{ perspective: '1000px' }}
-            aria-label="Saiba mais sobre nós"
+            aria-label="Sobre"
           >
-            <img 
-              src="/logo.png" 
-              alt="Exemplo Link Bio Logo" 
-              className={`w-28 sm:w-36 h-auto rounded-full shadow-lg transition-transform duration-1000 ${isLogoSpinning ? 'animate-spin-whoosh' : ''}`} 
-            />
+            <div className={`w-32 h-32 rounded-full overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.15)] ${isLogoSpinning ? 'animate-spin-whoosh' : ''}`}>
+                <img 
+                  src="/logo.png" 
+                  alt="Logo" 
+                  className="w-full h-full object-cover" 
+                />
+            </div>
           </button>
 
-          <h1 className="font-serif text-3xl sm:text-4xl font-bold text-center tracking-tight text-gradient-animated">
-            Exemplo Link Bio
+          <h1 className="font-serif text-3xl sm:text-4xl font-bold text-center tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400 drop-shadow-sm">
+            Seu Nome
           </h1>
 
-          <p className="text-sm sm:text-base font-medium text-center mt-2 mb-6 text-gradient-animated">
-            Seu slogan aqui em destaque para seu cliente
+          <div className="h-0.5 w-16 bg-gradient-to-r from-transparent via-amber-400 to-transparent my-4"></div>
+
+          <p className="text-sm sm:text-base font-light text-center mb-8 text-gray-300 tracking-wide">
+            Especialista em transformar ideias em resultados. <br/> Soluções premium para clientes exigentes.
           </p>
 
-          <div className="w-full flex flex-col space-y-3">
-            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '100ms'}}><LinkButton onClick={() => setActiveModal('services')} icon={<ServicesIcon />} text="Nossos Serviços" /></div>
-            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '200ms'}}><LinkButton onClick={() => setActiveModal('portfolio')} icon={<InstagramIcon />} text="Nosso Portfólio" /></div>
-            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '300ms'}}><LinkButton onClick={() => setActiveModal('location')} icon={<LocationIcon />} text="Nossa Localização" /></div>
-            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '400ms'}}><LinkButton onClick={() => setActiveModal('rating')} icon={<StarIcon />} text="Sua Opinião" /></div>
-            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '500ms'}}><LinkButton onClick={() => setActiveModal('contact')} icon={<WhatsAppIcon />} text="Fale Conosco" /></div>
+          <div className="w-full flex flex-col space-y-4">
+            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '100ms'}}>
+                <LinkButton onClick={() => setActiveModal('services')} icon={<ServicesIcon />} text="Soluções & Serviços" />
+            </div>
+            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '200ms'}}>
+                <LinkButton onClick={() => setActiveModal('portfolio')} icon={<InstagramIcon />} text="Galeria de Projetos" />
+            </div>
+            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '300ms'}}>
+                <LinkButton onClick={() => setActiveModal('location')} icon={<LocationIcon />} text="Onde Estamos" />
+            </div>
+            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '400ms'}}>
+                <LinkButton onClick={() => setActiveModal('rating')} icon={<StarIcon />} text="Avaliações" />
+            </div>
+            <div className="animate-fade-in-up opacity-0" style={{animationDelay: '500ms'}}>
+                <LinkButton onClick={() => setActiveModal('contact')} icon={<WhatsAppIcon />} text="Contato Direto" />
+            </div>
           </div>
 
-          <footer className="text-center mt-8 animate-fade-in opacity-0" style={{animationDelay: '600ms'}}>
-              <button onClick={() => setActiveModal('developer')} className="text-sm text-stone-600 hover:text-stone-900 transition-colors">
-                Desenvolvido por <strong className="font-semibold text-gradient-animated">InteligenciArte.IA</strong> ✨
+          <footer className="text-center mt-10 animate-fade-in opacity-0" style={{animationDelay: '700ms'}}>
+              <button onClick={() => setActiveModal('developer')} className="text-xs text-gray-500 hover:text-amber-400 transition-colors tracking-widest uppercase">
+                Desenvolvido por <span className="font-bold">InteligenciArte.IA</span>
               </button>
             </footer>
         </div>
       </div>
       
       {/* --- MODALS --- */}
-      <Modal isOpen={activeModal === 'about'} onClose={handleCloseModal} title="Conecte-se Com Seus Clientes">
-        <div className="text-left text-stone-700 space-y-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4 bg-white border-2 border-pink-200 p-4 rounded-lg animate-fade-in opacity-0">
-            <img src="/logo.png" alt="Foto do Proprietário" className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-white" />
-            <div>
-              <h4 className="font-serif text-xl text-pink-500 font-bold">Seu Nome Aqui</h4>
-              <p className="text-sm text-stone-600 mt-1 italic">"Sua paixão transformada em profissão. Uma frase que resume sua jornada."</p>
-            </div>
+      <Modal isOpen={activeModal === 'about'} onClose={handleCloseModal} title="Quem Sou Eu">
+        <div className="text-center space-y-6">
+          <div className="w-24 h-24 mx-auto rounded-full border-2 border-amber-400/50 p-1">
+            <img src="/logo.png" alt="Perfil" className="w-full h-full rounded-full object-cover grayscale hover:grayscale-0 transition-all duration-500" />
           </div>
           
-          <div className="text-stone-700 text-sm space-y-2 p-2 animate-fade-in opacity-0" style={{animationDelay: '100ms'}}>
-             <p>Este é o espaço para contar sua história! Fale sobre sua paixão, sua experiência e o que torna seu trabalho único.</p>
-             <p className="opacity-70"><strong>Exemplo:</strong> "Desde pequena, sou apaixonada por realçar a beleza natural. Após anos de estudo, fundei este espaço para criar um ambiente acolhedor onde cada cliente se sinta única..."</p>
+          <div>
+            <h3 className="text-xl font-bold text-white mb-2">Sua Marca Pessoal</h3>
+            <p className="text-sm text-gray-400 italic">"Excelência não é um ato, mas um hábito."</p>
           </div>
 
-          <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg mt-4 animate-fade-in opacity-0" style={{animationDelay: '200ms'}}>
-            <h4 className="font-bold">Por que isso é um diferencial?</h4>
-            <p className="mt-2 text-sm">
-              Uma seção "Quem Sou Eu" humaniza sua marca e cria um laço de confiança. Clientes não compram apenas um serviço; eles se conectam com a sua história. Isso te diferencia da concorrência e gera lealdade.
-            </p>
+          <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-left">
+             <p className="text-sm mb-3">Utilize este espaço para transmitir autoridade. Conte brevemente sua trajetória, certificações e o que motiva seu trabalho diário.</p>
+             <p className="text-sm opacity-70 border-l-2 border-amber-500 pl-3">
+                <strong>Objetivo:</strong> Conectar-se com o visitante através de valores compartilhados e profissionalismo.
+             </p>
           </div>
         </div>
-        <button onClick={handleCloseModal} className="w-full mt-6 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Entendi</button>
+        <button onClick={handleCloseModal} className="w-full mt-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-4 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all">Fechar</button>
       </Modal>
 
-      <Modal isOpen={activeModal === 'services'} onClose={handleCloseModal} title="Demonstração: Sua Vitrine de Serviços">
-        <div className="text-left text-stone-700 space-y-4">
+      <Modal isOpen={activeModal === 'services'} onClose={handleCloseModal} title="O Que Oferecemos">
+        <div className="space-y-4">
+          <p className="text-center text-sm text-gray-400 mb-4">Soluções desenhadas para superar expectativas.</p>
           
-          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg transition-shadow hover:shadow-md">
-            <h5 className="font-serif text-lg text-pink-500 font-bold">Exemplo 1: Serviço Detalhado</h5>
-            <p className="text-sm text-stone-600 mt-1">Aqui você pode descrever um serviço em detalhes, destacando os benefícios. A clareza nas informações e o preço visível incentivam a ação imediata da sua cliente.</p>
-            <div className="flex justify-between items-center mt-3">
-              <p className="text-sm font-semibold text-stone-700">Preço Fictício</p>
-              <button 
-                onClick={() => handleScheduleService('Serviço Detalhado')}
-                className="bg-pink-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-500 transition-colors text-sm"
-              >
-                Agendar (Simulação)
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg transition-shadow hover:shadow-md">
-            <h5 className="font-serif text-lg text-pink-500 font-bold">Exemplo 2: Pacote Promocional</h5>
-            <p className="text-sm text-stone-600 mt-1">Crie ofertas irresistíveis! Um pacote de serviços com desconto é uma ótima forma de aumentar o ticket médio e apresentar novos tratamentos.</p>
-            <div className="flex justify-between items-center mt-3">
-              <p className="text-sm font-semibold text-stone-700">Preço Fictício</p>
-              <button 
-                onClick={() => handleScheduleService('Pacote Promocional')}
-                className="bg-pink-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-500 transition-colors text-sm"
-              >
-                Agendar (Simulação)
-              </button>
-            </div>
-          </div>
+          {['Consultoria Especializada', 'Serviço Premium', 'Plano Mensal Exclusive'].map((item, idx) => (
+             <div key={idx} className="bg-white/5 border border-white/10 p-4 rounded-xl flex justify-between items-center group hover:bg-white/10 transition-colors">
+                <div>
+                    <h5 className="font-serif text-lg text-amber-400">{item}</h5>
+                    <p className="text-xs text-gray-400">Breve descrição do valor entregue.</p>
+                </div>
+                <button 
+                    onClick={() => handleScheduleService(item)}
+                    className="bg-white text-black text-xs font-bold py-2 px-3 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                    Consultar
+                </button>
+             </div>
+          ))}
           
-          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg transition-shadow hover:shadow-md">
-            <h5 className="font-serif text-lg text-pink-500 font-bold">Exemplo 3: Lançamento</h5>
-            <p className="text-sm text-stone-600 mt-1">Destaque uma novidade ou um procedimento exclusivo. É ideal para gerar curiosidade e atrair tanto clientes novas quanto as que já frequentam seu espaço.</p>
-            <div className="flex justify-between items-center mt-3">
-              <p className="text-sm font-semibold text-stone-700">Preço Fictício</p>
-              <button 
-                onClick={() => handleScheduleService('Lançamento Exclusivo')}
-                className="bg-pink-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-pink-500 transition-colors text-sm"
-              >
-                Agendar (Simulação)
-              </button>
-            </div>
-          </div>
-          
-          <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg mt-4">
-            <h4 className="font-bold">Da Vitrine ao WhatsApp</h4>
-            <p className="mt-2 text-sm">Aqui, sua cliente confere seus serviços e, com um clique, envia uma solicitação de agendamento personalizada direto para o seu WhatsApp. Facilita para ela, organiza para você.</p>
+          <div className="mt-4 pt-4 border-t border-white/10 text-center">
+            <p className="text-xs text-gray-500">Clique em "Consultar" para iniciar uma conversa via WhatsApp sobre este serviço específico.</p>
           </div>
         </div>
       </Modal>
       
-      <Modal isOpen={activeModal === 'portfolio'} onClose={handleCloseModal} title="Mostre Seu Talento (Portfólio)">
-        <div className="text-left text-stone-700 space-y-4">
-          <p>Este botão levaria suas clientes diretamente para o seu <strong>perfil do Instagram</strong> ou outra galeria de fotos.</p>
-          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg">
-            <p className="font-bold text-stone-800">Exemplo Fictício:</p>
-            <p className="text-sm text-stone-600 mt-2 italic">"Imagine que aqui sua cliente pode conferir um pouco do seu trabalho com um antes e depois, ou então direcionar para seu site oficial..."</p>
+      <Modal isOpen={activeModal === 'portfolio'} onClose={handleCloseModal} title="Galeria">
+        <div className="space-y-6 text-center">
+          <p className="text-sm">A melhor forma de vender é mostrar resultados. Este botão direciona para seu portfólio visual.</p>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="aspect-square bg-white/5 rounded-lg border border-white/10 flex items-center justify-center text-xs text-gray-500">Projeto 1</div>
+            <div className="aspect-square bg-white/5 rounded-lg border border-white/10 flex items-center justify-center text-xs text-gray-500">Projeto 2</div>
           </div>
-          <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg">
-            <h4 className="font-bold">Por que isso é um diferencial?</h4>
-            <p className="mt-2 text-sm">É a sua vitrine digital! Clientes podem ver a qualidade do seu trabalho, se inspirar e sentir mais confiança para agendar. Um portfólio forte é uma das melhores ferramentas para atrair e converter novas clientes.</p>
+
+          <div className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 p-4 rounded-xl border border-white/10">
+            <h4 className="font-bold text-white text-sm mb-1">Integração Social</h4>
+            <p className="text-xs text-gray-300">Direcione para Instagram, Behance, LinkedIn ou seu site oficial.</p>
           </div>
         </div>
-         <button onClick={handleCloseModal} className="w-full mt-6 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Entendi</button>
+         <button onClick={handleCloseModal} className="w-full mt-6 bg-white/10 border border-white/20 text-white font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-colors">Voltar</button>
       </Modal>
 
-      <Modal isOpen={activeModal === 'location'} onClose={handleCloseModal} title="Facilite a Chegada (Localização)">
-         <div className="text-left text-stone-700 space-y-4">
-          <p>Aqui, apareceria um <strong>mapa interativo</strong> e um botão "Como Chegar" que abriria o Waze ou Google Maps no celular da cliente.</p>
-          <div className="bg-white border-2 border-pink-200 p-4 rounded-lg text-center">
-            <p className="font-bold text-stone-800">Exemplo Link Bio</p>
-            <p className="text-sm text-stone-600 mt-1">Rua das Flores, 123 - Centro</p>
-            <p className="mt-2 text-pink-500 font-semibold">[ Ver no mapa e traçar rota ]</p>
+      <Modal isOpen={activeModal === 'location'} onClose={handleCloseModal} title="Localização">
+         <div className="space-y-6 text-center">
+          <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+             <LocationIcon />
+             <p className="mt-4 font-serif text-xl">Seu Endereço Premium</p>
+             <p className="text-sm text-gray-400 mt-2">Av. Business, 1000 - Torre A</p>
+             <p className="text-sm text-gray-400">São Paulo - SP</p>
           </div>
-          <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg">
-            <h4 className="font-bold">Por que isso é um diferencial?</h4>
-            <p className="mt-2 text-sm">Você elimina qualquer dúvida sobre como encontrar seu espaço. Isso reduz atrasos e cancelamentos, melhorando a experiência da cliente antes mesmo dela chegar, transmitindo profissionalismo e cuidado.</p>
+
+          <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-xl">
+            <p className="text-sm text-green-400 font-medium">Facilidade para seu cliente</p>
+            <p className="text-xs text-gray-400 mt-1">Ao clicar, o Waze ou Google Maps abre automaticamente com a rota traçada.</p>
           </div>
         </div>
-        <button onClick={handleCloseModal} className="w-full mt-6 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Entendi</button>
+        <button onClick={handleCloseModal} className="w-full mt-6 bg-white text-black font-bold py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors">Traçar Rota</button>
       </Modal>
 
-      <Modal isOpen={activeModal === 'rating'} onClose={handleCloseModal} title="Sua opinião nos inspira!">
-        <p className="text-center text-stone-700 mb-4">Como foi sua experiência conosco?</p>
-        <div className="flex justify-center items-center gap-2 my-4">
+      <Modal isOpen={activeModal === 'rating'} onClose={handleCloseModal} title="Avalie-nos">
+        <p className="text-center text-gray-300 mb-6 text-sm">Sua experiência define nosso padrão de qualidade.</p>
+        <div className="flex justify-center items-center gap-3 my-6">
             {[1, 2, 3, 4, 5].map((star) => (
-                <button key={star} onClick={() => setRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)} className="transition-transform duration-200 hover:scale-125" aria-label={`Avaliar ${star} estrela${star > 1 ? 's' : ''}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path className={`transition-colors ${(hoverRating || rating) >= star ? 'text-pink-400' : 'text-stone-300'}`} d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                <button key={star} onClick={() => setRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)} className="transition-transform duration-200 hover:scale-110 focus:outline-none" aria-label={`${star} estrelas`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                        <path className={`transition-colors duration-300 ${(hoverRating || rating) >= star ? 'text-amber-400' : 'text-gray-700'}`} d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
                 </button>
             ))}
         </div>
-        <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg mb-6">
-          <h4 className="font-bold">Por que isso é um diferencial?</h4>
-          <p className="mt-2 text-sm">
-            Esta funcionalidade é uma via de mão dupla: avaliações 5 estrelas geram prova social e podem ser direcionadas para o Google. Feedbacks construtivos se tornam uma oportunidade valiosa para você melhorar, demonstrando um atendimento excepcional e fidelizando a cliente.
-          </p>
-        </div>
-        <button onClick={handleRatingSubmit} disabled={rating === 0} className="w-full bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors disabled:bg-stone-300 disabled:cursor-not-allowed">Confirmar Avaliação</button>
+        <button onClick={handleRatingSubmit} disabled={rating === 0} className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-4 rounded-xl hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed">Enviar Avaliação</button>
       </Modal>
 
-      <Modal isOpen={activeModal === 'feedback'} onClose={handleCloseModal} title="Como podemos melhorar?">
-        <p className="text-stone-700 mb-4">Sua opinião é muito valiosa. Por favor, conte-nos o que podemos fazer para tornar sua próxima visita perfeita.</p>
+      <Modal isOpen={activeModal === 'feedback'} onClose={handleCloseModal} title="Feedback">
+        <p className="text-gray-300 mb-4 text-sm">Como podemos evoluir para melhor atendê-lo?</p>
         <form onSubmit={handleFeedbackSubmit}>
-            <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} className="w-full h-32 p-3 border-2 border-pink-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 transition text-stone-800" placeholder="Seu feedback..." required />
-            <button type="submit" className="w-full mt-4 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Enviar Feedback</button>
+            <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} className="w-full h-32 p-4 border border-white/20 rounded-xl bg-white/5 focus:outline-none focus:ring-1 focus:ring-amber-400 transition text-white placeholder-gray-600 text-sm" placeholder="Digite sua mensagem..." required />
+            <button type="submit" className="w-full mt-4 bg-white text-black font-bold py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors">Enviar</button>
         </form>
       </Modal>
 
-      <Modal isOpen={activeModal === 'contact'} onClose={handleCloseModal} title="Fale Conosco">
+      <Modal isOpen={activeModal === 'contact'} onClose={handleCloseModal} title="Iniciar Conversa">
         {contactStep === 1 ? (
-          <div>
-            <div className="mb-4">
-              <label htmlFor="contactName" className="block text-stone-700 font-semibold mb-2">Seu nome</label>
-              <input type="text" id="contactName" value={contactName} onChange={(e) => setContactName(e.target.value)} className="w-full p-2 border-2 border-pink-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 transition text-stone-800" required/>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Seu Nome</label>
+              <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} className="w-full p-3 border border-white/20 rounded-xl bg-white/5 focus:outline-none focus:border-amber-400 transition text-white" placeholder="Como gosta de ser chamado?" required/>
             </div>
-            <div className="mb-6">
-              <label className="block text-stone-700 font-semibold mb-2">Qual o motivo do contato?</label>
-              <div className="flex flex-col space-y-2">
-                <label className="flex items-center p-3 border-2 border-pink-200 rounded-lg has-[:checked]:bg-pink-100 has-[:checked]:border-pink-400 transition cursor-pointer">
-                  <input type="radio" name="contactReason" value="agendar" checked={contactReason === 'agendar'} onChange={(e) => setContactReason(e.target.value)} className="h-4 w-4 text-pink-600 focus:ring-pink-500"/>
-                  <span className="ml-3 text-stone-800">Agendar um Horário</span>
-                </label>
-                <label className="flex items-center p-3 border-2 border-pink-200 rounded-lg has-[:checked]:bg-pink-100 has-[:checked]:border-pink-400 transition cursor-pointer">
-                  <input type="radio" name="contactReason" value="outro" checked={contactReason === 'outro'} onChange={(e) => setContactReason(e.target.value)} className="h-4 w-4 text-pink-600 focus:ring-pink-500"/>
-                  <span className="ml-3 text-stone-800">Dúvidas e Outros</span>
-                </label>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Assunto</label>
+              <div className="grid grid-cols-1 gap-3">
+                <button 
+                    onClick={() => setContactReason('agendar')}
+                    className={`p-3 rounded-xl border text-left transition-all ${contactReason === 'agendar' ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'}`}
+                >
+                    Agendamento / Orçamento
+                </button>
+                <button 
+                    onClick={() => setContactReason('outro')}
+                    className={`p-3 rounded-xl border text-left transition-all ${contactReason === 'outro' ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'}`}
+                >
+                    Dúvidas Gerais
+                </button>
               </div>
             </div>
-            <button onClick={() => setContactStep(2)} disabled={!contactName || !contactReason} className="w-full bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors disabled:bg-stone-300 disabled:cursor-not-allowed">Próximo</button>
+            <button onClick={() => setContactStep(2)} disabled={!contactName || !contactReason} className="w-full mt-4 bg-white text-black font-bold py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Continuar</button>
           </div>
         ) : contactReason === 'agendar' ? (
-          <div>
+          <div className="space-y-4">
             {selectedService && (
-              <div className="mb-4 bg-pink-100 p-3 rounded-lg border border-pink-300">
-                <p className="text-sm text-stone-700">Serviço selecionado:</p>
-                <p className="font-bold text-pink-600">{selectedService}</p>
+              <div className="bg-amber-500/10 p-3 rounded-lg border border-amber-500/30 flex justify-between items-center">
+                <span className="text-sm text-amber-400">{selectedService}</span>
+                <button onClick={() => setSelectedService(null)} className="text-xs text-gray-500 hover:text-white">Alterar</button>
               </div>
             )}
-            <div className="mb-4">
-              <label htmlFor="contactDateTime" className="block text-stone-700 font-semibold mb-2">Qual a sua preferência de data e hora?</label>
-              <textarea id="contactDateTime" value={contactDateTime} onChange={(e) => setContactDateTime(e.target.value)} className="w-full h-24 p-2 border-2 border-pink-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 transition text-stone-800" placeholder="Ex: Amanhã à tarde, ou 25/12 às 15h" required/>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Preferência de Horário</label>
+              <input type="text" value={contactDateTime} onChange={(e) => setContactDateTime(e.target.value)} className="w-full p-3 border border-white/20 rounded-xl bg-white/5 focus:outline-none focus:border-amber-400 transition text-white" placeholder="Ex: Manhã, Tarde ou Data Específica" required/>
             </div>
             {!selectedService && (
-              <div className="mb-6">
-                <label className="block text-stone-700 font-semibold mb-2">Serviços de interesse (opcional)</label>
-                <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Interesses (Múltipla escolha)</label>
+                <div className="grid grid-cols-1 gap-2">
                     {Object.keys(contactServices).map(item => (
-                        <label key={item} className="flex items-center p-3 border-2 border-pink-200 rounded-lg has-[:checked]:bg-pink-100 has-[:checked]:border-pink-400 transition cursor-pointer">
-                            <input type="checkbox" checked={contactServices[item]} onChange={() => handleServiceCheckboxChange(item)} className="h-4 w-4 text-pink-600 rounded focus:ring-pink-500"/>
-                            <span className="ml-3 text-sm text-stone-800">{item}</span>
+                        <label key={item} className={`flex items-center p-3 border rounded-xl cursor-pointer transition-all ${contactServices[item] ? 'bg-white/10 border-amber-400/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
+                            <input type="checkbox" checked={contactServices[item]} onChange={() => handleServiceCheckboxChange(item)} className="accent-amber-500 h-4 w-4"/>
+                            <span className="ml-3 text-sm text-gray-200">{item}</span>
                         </label>
                     ))}
                 </div>
               </div>
             )}
-            <button onClick={handleSendWhatsApp} disabled={!contactDateTime} className="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-stone-300 disabled:cursor-not-allowed">Enviar via WhatsApp</button>
+            <button onClick={handleSendWhatsApp} disabled={!contactDateTime} className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+                <WhatsAppIcon /> Chamar no WhatsApp
+            </button>
           </div>
         ) : (
-           <div>
-            <div className="mb-4">
-                <label htmlFor="contactOtherReason" className="block text-stone-700 font-semibold mb-2">Deixe sua mensagem</label>
-                <textarea id="contactOtherReason" value={contactOtherReason} onChange={(e) => setContactOtherReason(e.target.value)} className="w-full h-32 p-2 border-2 border-pink-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 transition text-stone-800" required/>
+           <div className="space-y-4">
+            <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sua Mensagem</label>
+                <textarea value={contactOtherReason} onChange={(e) => setContactOtherReason(e.target.value)} className="w-full h-32 p-3 border border-white/20 rounded-xl bg-white/5 focus:outline-none focus:border-amber-400 transition text-white" required/>
             </div>
-            <button onClick={handleSendWhatsApp} disabled={!contactOtherReason} className="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-stone-300 disabled:cursor-not-allowed">Enviar via WhatsApp</button>
+            <button onClick={handleSendWhatsApp} disabled={!contactOtherReason} className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+                <WhatsAppIcon /> Chamar no WhatsApp
+            </button>
           </div>
         )}
       </Modal>
 
-      <Modal isOpen={activeModal === 'contactDemo'} onClose={handleCloseModal} title="Contato Direto e Profissional">
-        <div className="text-left text-stone-700 space-y-4">
-            <p>Em um site real, sua cliente seria direcionada para o <strong>WhatsApp com uma mensagem automática</strong>, já preenchida.</p>
-            <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                <p className="font-bold text-stone-800">Exemplo da mensagem gerada:</p>
-                <p className="text-sm text-stone-600 mt-2 bg-white p-3 rounded-md shadow-inner">"Olá! Meu nome é <strong>{contactName || 'Maria'}</strong> e gostaria de agendar um horário. Minha preferência é <strong>{contactDateTime || 'amanhã à tarde'}</strong>. Tenho interesse em <strong>{selectedService ? selectedService : Object.entries(contactServices).filter(([,v]) => v).map(([k])=>k).join(', ') || 'um de seus serviços'}</strong>. Obrigado(a)!"</p>
+      <Modal isOpen={activeModal === 'contactDemo'} onClose={handleCloseModal} title="Simulação de Envio">
+        <div className="space-y-4">
+            <p className="text-sm text-gray-300">Ao clicar no botão final, o cliente é redirecionado para o app do WhatsApp com a mensagem pronta:</p>
+            <div className="bg-[#0b141a] p-4 rounded-xl border border-white/5 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-[#25D366]"></div>
+                <p className="text-xs text-gray-500 mb-2">Mensagem Automática:</p>
+                <p className="text-sm text-white italic">"Olá! Me chamo <strong>{contactName || 'Visitante'}</strong>. {contactReason === 'agendar' ? `Gostaria de saber sobre disponibilidade para: ${contactDateTime}.` : `Gostaria de falar sobre: ${contactOtherReason.slice(0, 30)}...`}"</p>
             </div>
-            <div className="bg-green-100 border-l-4 border-green-500 text-stone-800 p-4 rounded-r-lg">
-                <h4 className="font-bold">Por que isso é um diferencial?</h4>
-                <p className="mt-2 text-sm">Você recebe as solicitações de forma clara e padronizada, economizando tempo. Para a cliente, é um processo rápido e fácil. Isso transmite uma imagem de organização e profissionalismo para o seu negócio.</p>
-            </div>
-        </div>
-        <button onClick={handleCloseModal} className="w-full mt-6 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Entendi</button>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'ratingSuccess5'} onClose={handleCloseModal} title="Agradecemos sua avaliação!">
-        <div className="text-left text-stone-700 space-y-4">
-            <p>Ficamos felizes com sua nota! Em um site real, você poderia convidar a cliente a deixar essa mesma avaliação na sua página do Google.</p>
-             <blockquote className="bg-white border-l-4 border-yellow-400 p-4 rounded-r-lg italic">
-                <p className="text-sm text-stone-600">"Atendimento impecável e o resultado ficou melhor do que eu imaginava! A profissional foi incrível. Com certeza voltarei!"</p>
-                <cite className="block text-right font-semibold text-stone-700 mt-2 not-italic">- Exemplo de avaliação no Google</cite>
-            </blockquote>
-            <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg">
-                <h4 className="font-bold">Por que isso é um diferencial?</h4>
-                <p className="mt-2 text-sm">Avaliações 5 estrelas no Google constroem sua reputação online, aumentam sua visibilidade nas buscas e atraem mais clientes que confiam na opinião de outras pessoas.</p>
+            <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl">
+                <h4 className="font-bold text-amber-400 text-sm">Profissionalismo</h4>
+                <p className="mt-1 text-xs text-gray-400">Padronize o primeiro contato e aumente sua taxa de conversão facilitando a vida do cliente.</p>
             </div>
         </div>
-        <button onClick={handleCloseModal} className="w-full mt-6 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Entendi</button>
+        <button onClick={handleCloseModal} className="w-full mt-4 bg-white text-black font-bold py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors">Entendido</button>
       </Modal>
 
-      <Modal isOpen={activeModal === 'feedbackSuccess'} onClose={handleCloseModal} title="Feedback Recebido!">
-        <div className="text-left text-stone-700 space-y-4">
-            <p>Obrigado por nos ajudar a melhorar! Sua mensagem foi recebida e será analisada com carinho.</p>
-            <div className="bg-white border-2 border-pink-200 p-4 rounded-lg">
-              <p className="font-bold text-stone-800">Exemplo de Ação:</p>
-              <p className="text-sm text-stone-600 mt-2 italic">"Com base no seu feedback sobre a música ambiente, já atualizamos nossa playlist para incluir opções mais relaxantes. Agradecemos a sugestão!"</p>
-            </div>
-            <div className="bg-pink-100 border-l-4 border-pink-400 text-stone-800 p-4 rounded-r-lg">
-                <h4 className="font-bold">Por que isso é um diferencial?</h4>
-                <p className="mt-2 text-sm">Coletar feedbacks mostra que você se importa com a opinião da cliente, ajuda a identificar pontos de melhoria e aumenta a fidelização. Uma cliente que se sente ouvida tem mais chances de voltar.</p>
+      <Modal isOpen={activeModal === 'ratingSuccess5'} onClose={handleCloseModal} title="Agradecemos!">
+        <div className="space-y-4 text-center">
+            <div className="text-5xl mb-2">⭐</div>
+            <p className="text-gray-300">Avaliações positivas impulsionam seu negócio no Google.</p>
+             <div className="bg-white/5 border-l-2 border-amber-400 p-4 rounded-r-xl text-left italic">
+                <p className="text-sm text-gray-400">"Incrível! O profissionalismo e a qualidade superaram minhas expectativas."</p>
             </div>
         </div>
-        <button onClick={handleCloseModal} className="w-full mt-6 bg-pink-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-500 transition-colors">Entendi</button>
+        <button onClick={handleCloseModal} className="w-full mt-6 bg-white/10 border border-white/20 text-white font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-colors">Fechar</button>
       </Modal>
 
-      <Modal isOpen={activeModal === 'developer'} onClose={handleCloseModal} title="Contato do Desenvolvedor">
+      <Modal isOpen={activeModal === 'feedbackSuccess'} onClose={handleCloseModal} title="Recebido">
+        <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto text-green-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p className="text-gray-300">Obrigado pela colaboração. Estamos sempre em busca da excelência.</p>
+        </div>
+        <button onClick={handleCloseModal} className="w-full mt-6 bg-white/10 border border-white/20 text-white font-bold py-3 px-4 rounded-xl hover:bg-white/20 transition-colors">Fechar</button>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'developer'} onClose={handleCloseModal} title="InteligenciArte.IA">
         {developerModalStep === 1 ? (
-          <div className="text-center text-stone-700 space-y-4">
-            <p>Este site é um modelo desenvolvido por <strong>InteligenciArte.IA</strong> para demonstrar o potencial de um "link na bio" profissional.</p>
-            <a 
-              href="https://instagram.com/inteligenciarte.ia" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="inline-flex items-center justify-center w-full bg-white border-2 border-pink-300 text-stone-800 font-bold py-3 px-4 rounded-lg hover:bg-rose-100 transition-colors"
-            >
-              <InstagramIcon />
-              <span className="ml-2">@inteligenciarte.ia</span>
-              <ExternalLinkIcon className="ml-auto w-5 h-5" />
-            </a>
-            <p className="text-sm pt-2">Gostou e quer um para o seu negócio? Fale comigo!</p>
+          <div className="text-center space-y-6">
+            <p className="text-gray-300 font-light">Gostou deste modelo? Transforme a apresentação do seu negócio com um cartão digital de alta performance.</p>
+            
+            <div className="grid grid-cols-1 gap-3">
+                 <a 
+                  href="https://instagram.com/inteligenciarte.ia" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center justify-center w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-4 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all"
+                >
+                  <InstagramIcon />
+                  <span className="ml-2">Siga no Instagram</span>
+                </a>
+            </div>
+
+            <p className="text-xs text-gray-500 uppercase tracking-widest pt-4">Solicite o seu agora</p>
             <button 
               onClick={() => setDeveloperModalStep(2)}
-              className="w-full animated-gradient text-white font-bold py-3 px-4 rounded-lg hover:scale-105 transition-transform shadow-lg"
+              className="w-full bg-white text-black font-bold py-3 px-4 rounded-xl hover:bg-gray-200 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             >
-              Quero um site incrível como esse! 🚀
+              Quero um Site Igual a Esse 🚀
             </button>
           </div>
         ) : (
-          <form onSubmit={handleDeveloperContactSubmit}>
-            <p className="text-stone-700 mb-4 text-center">Que ótimo! Para personalizar seu contato, por favor, me diga seu nome.</p>
-            <div className="mb-4">
-              <label htmlFor="devContactName" className="sr-only">Seu nome</label>
+          <form onSubmit={handleDeveloperContactSubmit} className="space-y-4">
+            <p className="text-gray-300 text-center text-sm">Vamos criar algo incrível juntos.</p>
+            <div>
               <input 
                 type="text" 
-                id="devContactName" 
                 value={developerContactName} 
                 onChange={(e) => setDeveloperContactName(e.target.value)} 
-                className="w-full p-3 border-2 border-pink-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 transition text-stone-800" 
-                placeholder="Seu nome"
+                className="w-full p-3 border border-white/20 rounded-xl bg-white/5 focus:outline-none focus:border-amber-400 transition text-white text-center" 
+                placeholder="Seu Nome"
                 required
               />
             </div>
             <button 
               type="submit"
               disabled={!developerContactName.trim()}
-              className="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-stone-300 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center disabled:opacity-50"
             >
               <WhatsAppIcon />
-              <span className="ml-2">Enviar para o WhatsApp</span>
+              <span className="ml-2">Enviar Solicitação</span>
             </button>
           </form>
         )}
       </Modal>
       
       <style>{`
-        body { font-family: 'Montserrat', sans-serif; }
-        .font-serif { font-family: 'Playfair Display', serif; }
+        body { font-family: 'Outfit', sans-serif; background-color: #000; }
+        .font-serif { font-family: 'Cinzel', serif; }
+        
+        /* Animated Deep Gradient Background - Luxury & Vibrant */
         .animated-gradient {
-            background: linear-gradient(-45deg, #ffe5e9, #f4d3e3, #e8d5f0, #e1e0f2);
+            background: linear-gradient(300deg, #000000, #1a0b2e, #111827, #2e1065, #000000);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
         }
-        .text-gradient-animated {
-          background: linear-gradient(-60deg, #ec4899, #d946ef, #f87171, #fb923c, #ec4899);
-          background-size: 300% 300%;
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          animation: text-gradient-flow 8s ease-in-out infinite;
-        }
-        @keyframes text-gradient-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+
         @keyframes gradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -507,28 +500,25 @@ const App: React.FC = () => {
             to { opacity: 1; }
         }
         @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes spin-whoosh {
-          0% {
-            transform: rotateY(0deg) scale(1);
-            opacity: 1;
-          }
-          100% {
-            transform: rotateY(720deg) scale(20);
-            opacity: 0;
-          }
+          0% { transform: rotateY(0deg) scale(1); opacity: 1; }
+          50% { opacity: 0.5; }
+          100% { transform: rotateY(360deg) scale(1.2); opacity: 1; }
         }
         .animate-spin-whoosh {
-          animation: spin-whoosh 0.8s cubic-bezier(0.5, 0, 0.75, 1) forwards;
-          transform-style: preserve-3d;
-          position: relative;
-          z-index: 60;
+          animation: spin-whoosh 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .animate-fade-in { animation: fade-in 0.5s forwards cubic-bezier(0.4, 0, 0.2, 1); }
-        .animate-fade-in-up { animation: fade-in-up 0.6s forwards cubic-bezier(0.4, 0, 0.2, 1); }
-        .opacity-0 { opacity: 0; }
+        .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards; }
+        
+        /* Custom Scrollbar for Modals */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
       `}</style>
     </main>
   );
